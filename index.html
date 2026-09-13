@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پشکنەری واتی شەحنکردنەوەی مۆبایل</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts - Vazirmatn for Kurdish RTL UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+        }
+        .glow-effect {
+            box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .glow-watt {
+            box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.6);
+        }
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.98); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center p-3 sm:p-6 bg-slate-950 text-slate-100">
+
+    <!-- Header -->
+    <header class="w-full max-w-2xl text-center my-4">
+        <div class="inline-flex items-center gap-2 bg-blue-950/80 border border-blue-800 text-blue-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-3">
+            <i class="fa-solid fa-bolt text-yellow-400"></i>
+            <span>ناسەرەوەی خێرای واتی شەحن</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            مۆبایلەکەت پشتگیری <span class="text-emerald-400">چەند وات</span> دەکات؟
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base mt-2">
+            بەبێ پێویستی بە دابەزاندنی بەرنامە، بزانە خێراترین ئاداپتەر بۆ مۆبایلەکەت چەند واتە.
+        </p>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-2xl space-y-6 my-2">
+
+        <!-- Device Detection Card -->
+        <div id="detectionCard" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-8 backdrop-blur-md relative overflow-hidden transition-all duration-300">
+            <!-- Background Glow Decor -->
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Identified Device Badge -->
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <div id="brandIcon" class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-2xl text-blue-400 border border-slate-700">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">جۆری مۆبایلەکەت:</div>
+                        <div id="deviceName" class="text-lg sm:text-xl font-bold text-white">لە حاڵەتی دەستنیشانکردندا...</div>
+                    </div>
+                </div>
+                <span id="accuracyBadge" class="bg-emerald-950/80 text-emerald-400 border border-emerald-800 text-xs px-2.5 py-1 rounded-lg">
+                    دەستنیشانکراوە
+                </span>
+            </div>
+
+            <!-- Prominent Wattage Display -->
+            <div class="text-center py-6 bg-slate-950/60 rounded-2xl border border-slate-800/80 my-4 glow-watt relative">
+                <div class="text-slate-400 text-sm font-medium mb-1">زۆرترین پشتگیری شەحنی بەستراو (Wired):</div>
+                <div class="flex items-center justify-center gap-1 my-2">
+                    <span id="wattDisplay" class="text-5xl sm:text-7xl font-black text-emerald-400 tracking-tight">--</span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-emerald-500">وات (W)</span>
+                </div>
+                <p id="chargingProtocol" class="text-xs text-slate-400 mt-2 font-mono">پڕۆتۆکۆڵ: USB Power Delivery 3.0 / PPS</p>
+            </div>
+
+            <!-- Detailed Specifications Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
+                <!-- Wireless Charging -->
+                <div class="bg-slate-800/50 border border-slate-700/50 p-3.5 rounded-xl text-center">
+                    <i class="fa-solid fa-wifi text-emerald-400 text-lg mb-1"></i>
+                    <div class="text-xs text-slate-400">شەحنی بێوایەر</div>
+                    <div id="wirelessWatt" class="text-sm sm:text-base font-bold text-slate-200 mt-0.5">--</div>
+                </div>
+
+                <!-- Battery Capacity -->
+                <div class="bg-slate-800/50 border border-slate-700/50 p-3.5 rounded-xl text-center">
+                    <i class="fa-solid fa-car-battery text-blue-400 text-lg mb-1"></i>
+                    <div class="text-xs text-slate-400">قەبارەی باتری</div>
+                    <div id="batteryCapacity" class="text-sm sm:text-base font-bold text-slate-200 mt-0.5">--</div>
+                </div>
+
+                <!-- Estimated Charge Time -->
+                <div class="bg-slate-800/50 border border-slate-700/50 p-3.5 rounded-xl text-center col-span-2 sm:col-span-1">
+                    <i class="fa-solid fa-stopwatch text-amber-400 text-lg mb-1"></i>
+                    <div class="text-xs text-slate-400">کاتی پڕبوون (0-100٪)</div>
+                    <div id="chargingTimeEst" class="text-sm sm:text-base font-bold text-slate-200 mt-0.5">-- خولەک</div>
+                </div>
+            </div>
+
+            <!-- Real-time Battery Status Widget -->
+            <div id="batteryLiveSection" class="mt-6 pt-4 border-t border-slate-800">
+                <div class="flex justify-between items-center text-xs text-slate-400 mb-2">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-plug text-blue-400"></i>
+                        دۆخی ڕاستەوخۆی باتری مۆبایلەکەت:
+                    </span>
+                    <span id="batteryPercentText" class="font-bold text-slate-200">--%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                    <div id="batteryBar" class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div id="batteryPlugStatus" class="text-center text-xs text-slate-400 mt-2">
+                    کێبڵەکە نەبەستراوەتەوە
+                </div>
+            </div>
+
+            <!-- Recommendation Alert -->
+            <div id="chargerRecommendation" class="mt-6 bg-blue-950/50 border border-blue-900/60 p-4 rounded-2xl flex items-start gap-3">
+                <i class="fa-solid fa-circle-info text-blue-400 text-lg mt-0.5"></i>
+                <div class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    <strong>شیکاری پێشنیارکراو:</strong> بۆ دەستکەوتنی ئەم خێراییە، پێویستت بە ئاداپتەرێک دەبێت کە لانیکەم پشتگیری <span id="recWatt" class="text-emerald-400 font-bold">--</span> بکات لەگەڵ کێبڵی گونجاو.
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Model Selection Accordion -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 sm:p-5">
+            <button id="toggleManualBtn" onclick="toggleManualSearch()" class="w-full flex items-center justify-between text-slate-300 font-semibold text-sm">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-blue-400"></i>
+                    دەتەوێت زانیاری مۆبایلێکی تر بزانیت؟ (گەڕانی دەستی)
+                </span>
+                <i id="toggleChevron" class="fa-solid fa-chevron-down text-slate-500 transition-transform"></i>
+            </button>
+
+            <div id="manualSearchSection" class="hidden mt-4 space-y-3 pt-3 border-t border-slate-800">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">مارکە هەڵبژێرە:</label>
+                        <select id="brandSelect" onchange="filterModelsByBrand()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
+                            <option value="all">هەموان (All Brands)</option>
+                            <option value="Apple">Apple (ئایفۆن)</option>
+                            <option value="Samsung">Samsung (سامسۆنگ)</option>
+                            <option value="Xiaomi">Xiaomi (شیامی / POCO / Redmi)</option>
+                            <option value="OnePlus">OnePlus (وەنپلەس)</option>
+                            <option value="Google">Google (گووگڵ پێکسڵ)</option>
+                            <option value="Huawei">Huawei (هواوی)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">مۆدێل دیاریبکە:</label>
+                        <select id="modelSelect" onchange="selectManualModel()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Share Card -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 text-center">
+            <h3 class="text-base sm:text-lg font-bold text-white mb-2">
+                <i class="fa-solid fa-qrcode text-emerald-400 ml-1"></i>
+                بارکۆدەکەت بۆ سکانکردن لەگەڵ مۆبایلی تر
+            </h3>
+            <p class="text-xs text-slate-400 mb-4">
+                ئەم بارکۆدە بۆ هەر مۆبایلێک سکان بکەی، ڕاستەوخۆ پشتگیری واتی ئەو مۆبایلە پیشان دەدات:
+            </p>
+
+            <div class="flex flex-col items-center justify-center my-4">
+                <div class="p-4 bg-white rounded-2xl shadow-xl inline-block border-4 border-slate-700">
+                    <div id="qrcode"></div>
+                </div>
+                <div class="text-xs text-slate-500 mt-3 flex items-center gap-1">
+                    <i class="fa-solid fa-link"></i>
+                    <span id="currentUrlDisplay" class="truncate max-w-xs font-mono">https://watt-checker.page</span>
+                </div>
+            </div>
+
+            <button onclick="copyPageLink()" class="mt-2 bg-slate-800 hover:bg-slate-700 text-blue-400 font-semibold px-4 py-2 rounded-xl text-xs sm:text-sm border border-slate-700 inline-flex items-center gap-2 transition">
+                <i class="fa-regular fa-copy"></i>
+                <span>کۆپیکردنی لینکی بارکۆد</span>
+            </button>
+            <div id="copyToast" class="hidden text-xs text-emerald-400 mt-2 font-medium">
+                بەسەرکەوتوویی کۆپی کرا!
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-2xl text-center text-xs text-slate-500 my-4 border-t border-slate-900 pt-4">
+        پشکنەری هۆشمەندی واتی مۆبایل &copy; 2026 | زانیارییەکان لەسەر بنەمای پێوەری فەرمی دروستکەران ڕێکخراون.
+    </footer>
+
+    <script>
+        const DEVICE_DATABASE = [
+            // Apple iPhone Series
+            { id: "iphone16promax", brand: "Apple", name: "iPhone 16 Pro Max", wiredWatt: 45, wirelessWatt: "25W (MagSafe)", battery: "4685 mAh", protocol: "USB Power Delivery 3.0", estMin: 60, keywords: ["iPhone16,2", "iPhone16ProMax"] },
+            { id: "iphone16pro", brand: "Apple", name: "iPhone 16 Pro", wiredWatt: 45, wirelessWatt: "25W (MagSafe)", battery: "3582 mAh", protocol: "USB Power Delivery 3.0", estMin: 55, keywords: ["iPhone16,1", "iPhone16Pro"] },
+            { id: "iphone16", brand: "Apple", name: "iPhone 16 / 16 Plus", wiredWatt: 45, wirelessWatt: "25W (MagSafe)", battery: "3561 mAh", protocol: "USB Power Delivery 3.0", estMin: 60, keywords: ["iPhone16"] },
+            { id: "iphone15promax", brand: "Apple", name: "iPhone 15 Pro Max", wiredWatt: 27, wirelessWatt: "15W (MagSafe)", battery: "4422 mAh", protocol: "USB Power Delivery 3.0", estMin: 70, keywords: ["iPhone15ProMax", "iPhone15,3"] },
+            { id: "iphone15pro", brand: "Apple", name: "iPhone 15 Pro", wiredWatt: 27, wirelessWatt: "15W (MagSafe)", battery: "3274 mAh", protocol: "USB Power Delivery 3.0", estMin: 65, keywords: ["iPhone15Pro", "iPhone15,2"] },
+            { id: "iphone15", brand: "Apple", name: "iPhone 15 / 15 Plus", wiredWatt: 20, wirelessWatt: "15W (MagSafe)", battery: "3349 mAh", protocol: "USB Power Delivery 2.0", estMin: 75, keywords: ["iPhone15", "iPhone15,1"] },
+            { id: "iphone14promax", brand: "Apple", name: "iPhone 14 Pro Max", wiredWatt: 27, wirelessWatt: "15W (MagSafe)", battery: "4323 mAh", protocol: "USB Power Delivery 2.0", estMin: 75, keywords: ["iPhone14ProMax"] },
+            { id: "iphone14pro", brand: "Apple", name: "iPhone 14 Pro", wiredWatt: 23, wirelessWatt: "15W (MagSafe)", battery: "3200 mAh", protocol: "USB Power Delivery 2.0", estMin: 70, keywords: ["iPhone14Pro"] },
+            { id: "iphone13promax", brand: "Apple", name: "iPhone 13 Pro Max", wiredWatt: 27, wirelessWatt: "15W (MagSafe)", battery: "4352 mAh", protocol: "USB Power Delivery 2.0", estMin: 80, keywords: ["iPhone13ProMax"] },
+            { id: "iphone13", brand: "Apple", name: "iPhone 13 / 13 Pro", wiredWatt: 20, wirelessWatt: "15W (MagSafe)", battery: "3240 mAh", protocol: "USB Power Delivery 2.0", estMin: 75, keywords: ["iPhone13"] },
+            { id: "iphone12", brand: "Apple", name: "iPhone 12 / 12 Pro", wiredWatt: 20, wirelessWatt: "15W (MagSafe)", battery: "2815 mAh", protocol: "USB Power Delivery 2.0", estMin: 75, keywords: ["iPhone12"] },
+            { id: "iphone11", brand: "Apple", name: "iPhone 11 / 11 Pro", wiredWatt: 18, wirelessWatt: "7.5W (Qi)", battery: "3110 mAh", protocol: "USB Power Delivery 2.0", estMin: 90, keywords: ["iPhone11"] },
+
+            // Samsung Galaxy Series
+            { id: "s24ultra", brand: "Samsung", name: "Samsung Galaxy S24 Ultra", wiredWatt: 45, wirelessWatt: "15W", battery: "5000 mAh", protocol: "Super Fast Charging 2.0 (PD 3.0 PPS)", estMin: 55, keywords: ["SM-S928", "S24 Ultra"] },
+            { id: "s24plus", brand: "Samsung", name: "Samsung Galaxy S24+", wiredWatt: 45, wirelessWatt: "15W", battery: "4900 mAh", protocol: "Super Fast Charging 2.0 (PD 3.0 PPS)", estMin: 55, keywords: ["SM-S926", "S24+"] },
+            { id: "s24base", brand: "Samsung", name: "Samsung Galaxy S24", wiredWatt: 25, wirelessWatt: "15W", battery: "4000 mAh", protocol: "Super Fast Charging (PD 3.0)", estMin: 70, keywords: ["SM-S921", "S24"] },
+            { id: "s23ultra", brand: "Samsung", name: "Samsung Galaxy S23 Ultra", wiredWatt: 45, wirelessWatt: "15W", battery: "5000 mAh", protocol: "Super Fast Charging 2.0", estMin: 59, keywords: ["SM-S918", "S23 Ultra"] },
+            { id: "s23base", brand: "Samsung", name: "Samsung Galaxy S23 / S23+", wiredWatt: 25, wirelessWatt: "15W", battery: "3900 mAh", protocol: "Super Fast Charging", estMin: 70, keywords: ["SM-S911", "SM-S916"] },
+            { id: "s22ultra", brand: "Samsung", name: "Samsung Galaxy S22 Ultra", wiredWatt: 45, wirelessWatt: "15W", battery: "5000 mAh", protocol: "Super Fast Charging 2.0", estMin: 62, keywords: ["SM-S908"] },
+            { id: "a55", brand: "Samsung", name: "Samsung Galaxy A55 / A54", wiredWatt: 25, wirelessWatt: "پشتگیری ناکات", battery: "5000 mAh", protocol: "Super Fast Charging (25W)", estMin: 80, keywords: ["SM-A556", "SM-A546", "Galaxy A55", "Galaxy A54"] },
+            { id: "zfold5", brand: "Samsung", name: "Samsung Galaxy Z Fold 5 / Fold 6", wiredWatt: 25, wirelessWatt: "15W", battery: "4400 mAh", protocol: "Super Fast Charging", estMin: 80, keywords: ["SM-F946", "SM-F956"] },
+
+            // Xiaomi / POCO / Redmi
+            { id: "xiaomi14ultra", brand: "Xiaomi", name: "Xiaomi 14 Ultra / 14 Pro", wiredWatt: 90, wirelessWatt: "80W", battery: "5000 mAh", protocol: "Xiaomi HyperCharge", estMin: 33, keywords: ["24030PN60G", "Xiaomi 14"] },
+            { id: "xiaomi13pro", brand: "Xiaomi", name: "Xiaomi 13 Pro / 12 Pro", wiredWatt: 120, wirelessWatt: "50W", battery: "4820 mAh", protocol: "Xiaomi HyperCharge 120W", estMin: 19, keywords: ["2210132G", "Xiaomi 13"] },
+            { id: "pocox6pro", brand: "Xiaomi", name: "POCO X6 Pro / Redmi Note 13 Pro", wiredWatt: 67, wirelessWatt: "پشتگیری ناکات", battery: "5000 mAh", protocol: "Turbo Charge 67W", estMin: 44, keywords: ["2311DRK48G", "POCO", "Redmi"] },
+            { id: "redminote13proplus", brand: "Xiaomi", name: "Redmi Note 13 Pro+", wiredWatt: 120, wirelessWatt: "پشتگیری ناکات", battery: "5000 mAh", protocol: "HyperCharge 120W", estMin: 19, keywords: ["23090RA98G"] },
+
+            // OnePlus
+            { id: "oneplus12", brand: "OnePlus", name: "OnePlus 12 / 12R", wiredWatt: 100, wirelessWatt: "50W", battery: "5400 mAh", protocol: "SUPERVOOC 100W", estMin: 26, keywords: ["CPH2581", "OnePlus 12"] },
+            { id: "oneplus11", brand: "OnePlus", name: "OnePlus 11 / 10 Pro", wiredWatt: 80, wirelessWatt: "50W", battery: "5000 mAh", protocol: "SUPERVOOC 80W", estMin: 32, keywords: ["CPH2449", "OnePlus 11"] },
+
+            // Google Pixel
+            { id: "pixel9pro", brand: "Google", name: "Google Pixel 9 Pro / 8 Pro", wiredWatt: 30, wirelessWatt: "23W", battery: "5050 mAh", protocol: "USB Power Delivery 3.0 PPS", estMin: 75, keywords: ["Pixel 8 Pro", "Pixel 9 Pro"] },
+            { id: "pixel8", brand: "Google", name: "Google Pixel 8 / 7 Pro", wiredWatt: 27, wirelessWatt: "20W", battery: "4575 mAh", protocol: "USB Power Delivery 3.0 PPS", estMin: 80, keywords: ["Pixel 8", "Pixel 7"] },
+
+            // Huawei
+            { id: "mate60pro", brand: "Huawei", name: "Huawei Mate 60 Pro / P60 Pro", wiredWatt: 88, wirelessWatt: "50W", battery: "5000 mAh", protocol: "HUAWEI SuperCharge 88W", estMin: 35, keywords: ["ALN-AL00", "Mate 60"] }
+        ];
+
+        function detectDevice() {
+            const ua = navigator.userAgent || "";
+            const platform = navigator.platform || "";
+            let matchedDevice = null;
+
+            // 1. Check against UserAgent & Model Keywords
+            for (let dev of DEVICE_DATABASE) {
+                for (let kw of dev.keywords) {
+                    if (ua.toLowerCase().includes(kw.toLowerCase())) {
+                        matchedDevice = dev;
+                        break;
+                    }
+                }
+                if (matchedDevice) break;
+            }
+
+            // 2. iOS Hardware Detection fallback using Screen Resolution & Pixel Ratio
+            if (!matchedDevice && (ua.includes("iPhone") || ua.includes("iPad") || (platform === "MacIntel" && navigator.maxTouchPoints > 1))) {
+                const w = window.screen.width;
+                const h = window.screen.height;
+
+                // Match iOS Screen Sizes
+                if ((w === 430 && h === 932) || (w === 440 && h === 956)) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone16promax") || DEVICE_DATABASE[0];
+                } else if ((w === 393 && h === 852) || (w === 402 && h === 874)) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone16pro") || DEVICE_DATABASE[1];
+                } else if (w === 390 && h === 844) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone14pro") || DEVICE_DATABASE[7];
+                } else if (w === 428 && h === 926) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone14promax") || DEVICE_DATABASE[6];
+                } else {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone15") || DEVICE_DATABASE[5];
+                }
+            }
+
+            // 3. Android General Fallback based on Brands
+            if (!matchedDevice) {
+                if (ua.includes("Samsung") || ua.includes("SM-")) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "s24ultra");
+                } else if (ua.includes("Xiaomi") || ua.includes("Redmi") || ua.includes("POCO")) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "pocox6pro");
+                } else if (ua.includes("Pixel")) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "pixel8");
+                } else if (ua.includes("OnePlus")) {
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "oneplus12");
+                }
+            }
+
+            // Default fallback
+            if (!matchedDevice) {
+                matchedDevice = {
+                    id: "generic",
+                    brand: "گشتی",
+                    name: "مۆبایلی زیرەک (مۆدێلی گشتی)",
+                    wiredWatt: 25,
+                    wirelessWatt: "10W - 15W",
+                    battery: "4500 mAh",
+                    protocol: "USB Power Delivery 3.0 / Quick Charge",
+                    estMin: 70
+                };
+            }
+
+            renderDeviceDetails(matchedDevice);
+        }
+
+        function renderDeviceDetails(device) {
+            document.getElementById('deviceName').innerText = device.name;
+            document.getElementById('wattDisplay').innerText = device.wiredWatt;
+            document.getElementById('wirelessWatt').innerText = device.wirelessWatt;
+            document.getElementById('batteryCapacity').innerText = device.battery;
+            document.getElementById('chargingTimeEst').innerText = device.estMin + " خولەک";
+            document.getElementById('chargingProtocol').innerText = "پڕۆتۆکۆڵ: " + device.protocol;
+            document.getElementById('recWatt').innerText = device.wiredWatt + " وات";
+
+            const brandIconEl = document.getElementById('brandIcon');
+            if (device.brand === "Apple") {
+                brandIconEl.innerHTML = '<i class="fa-brands fa-apple text-3xl text-white"></i>';
+            } else if (device.brand === "Samsung") {
+                brandIconEl.innerHTML = '<i class="fa-solid fa-mobile-retro text-2xl text-blue-400"></i>';
+            } else if (device.brand === "Xiaomi") {
+                brandIconEl.innerHTML = '<i class="fa-solid fa-bolt text-2xl text-orange-400"></i>';
+            } else {
+                brandIconEl.innerHTML = '<i class="fa-solid fa-mobile-screen-button text-2xl text-emerald-400"></i>';
+            }
+        }
+
+        function initBatteryAPI() {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(function(battery) {
+                    updateBatteryUI(battery);
+                    battery.addEventListener('levelchange', () => updateBatteryUI(battery));
+                    battery.addEventListener('chargingchange', () => updateBatteryUI(battery));
+                });
+            } else {
+                document.getElementById('batteryLiveSection').style.display = 'none';
+            }
+        }
+
+        function updateBatteryUI(battery) {
+            const level = Math.round(battery.level * 100);
+            document.getElementById('batteryPercentText').innerText = level + "%";
+            document.getElementById('batteryBar').style.width = level + "%";
+
+            const plugStatus = document.getElementById('batteryPlugStatus');
+            if (battery.charging) {
+                plugStatus.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-bolt pulse-animation"></i> شەحنکەرەوە بەستراوەتەوە - شەحن دەبێتەوە</span>';
+            } else {
+                plugStatus.innerHTML = '<span class="text-slate-400"><i class="fa-solid fa-plug"></i> لە شەحنکەرەوە نەبەستراوەتەوە</span>';
+            }
+        }
+
+        function populateModelSelect(filterBrand = "all") {
+            const select = document.getElementById('modelSelect');
+            select.innerHTML = '';
+
+            const filtered = filterBrand === "all" ? 
+                DEVICE_DATABASE : 
+                DEVICE_DATABASE.filter(d => d.brand === filterBrand);
+
+            filtered.forEach(dev => {
+                const opt = document.createElement('option');
+                opt.value = dev.id;
+                opt.innerText = `${dev.name} (${dev.wiredWatt}W)`;
+                select.appendChild(opt);
+            });
+        }
+
+        function filterModelsByBrand() {
+            const brand = document.getElementById('brandSelect').value;
+            populateModelSelect(brand);
+            selectManualModel();
+        }
+
+        function selectManualModel() {
+            const selectedId = document.getElementById('modelSelect').value;
+            const found = DEVICE_DATABASE.find(d => d.id === selectedId);
+            if (found) {
+                renderDeviceDetails(found);
+                document.getElementById('accuracyBadge').innerText = "دیاریکراوی دەستی";
+                document.getElementById('accuracyBadge').className = "bg-blue-950/80 text-blue-400 border border-blue-800 text-xs px-2.5 py-1 rounded-lg";
+            }
+        }
+
+        function toggleManualSearch() {
+            const sec = document.getElementById('manualSearchSection');
+            const chevron = document.getElementById('toggleChevron');
+            if (sec.classList.contains('hidden')) {
+                sec.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                sec.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function generateQRCode() {
+            const currentUrl = window.location.href;
+            document.getElementById('currentUrlDisplay').innerText = currentUrl;
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+
+            new QRCode(qrContainer, {
+                text: currentUrl,
+                width: 160,
+                height: 160,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        function copyPageLink() {
+            const url = window.location.href;
+            const tempInput = document.createElement("input");
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            const toast = document.getElementById('copyToast');
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+
+        window.onload = function() {
+            detectDevice();
+            initBatteryAPI();
+            populateModelSelect();
+            generateQRCode();
+        };
+    </script>
+</body>
+</html>
