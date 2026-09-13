@@ -81,7 +81,7 @@
                     <span id="wattDisplay" class="text-5xl sm:text-7xl font-black text-emerald-400 tracking-tight">--</span>
                     <span class="text-2xl sm:text-3xl font-extrabold text-emerald-500">وات (W)</span>
                 </div>
-                <p id="chargingProtocol" class="text-xs text-slate-400 mt-2 font-mono">پڕۆتۆکۆڵ: USB Power Delivery 3.0 / PPS</p>
+                <p id="chargingProtocol" class="text-xs text-slate-400 mt-2 font-mono">پڕۆتۆکۆڵ: USB Power Delivery 2.0</p>
             </div>
 
             <!-- Detailed Specifications Grid -->
@@ -139,7 +139,7 @@
             <button id="toggleManualBtn" onclick="toggleManualSearch()" class="w-full flex items-center justify-between text-slate-300 font-semibold text-sm">
                 <span class="flex items-center gap-2">
                     <i class="fa-solid fa-magnifying-glass text-blue-400"></i>
-                    دەتەوێت زانیاری مۆبایلێکی تر بزانیت؟ (گەڕانی دەستی)
+                    دەستکاری مۆدێل بکە یان مۆبایلێکی تر هەڵبژێرە (گەڕانی دەستی)
                 </span>
                 <i id="toggleChevron" class="fa-solid fa-chevron-down text-slate-500 transition-transform"></i>
             </button>
@@ -219,7 +219,10 @@
             { id: "iphone13promax", brand: "Apple", name: "iPhone 13 Pro Max", wiredWatt: 27, wirelessWatt: "15W (MagSafe)", battery: "4352 mAh", protocol: "USB Power Delivery 2.0", estMin: 80, keywords: ["iPhone13ProMax"] },
             { id: "iphone13", brand: "Apple", name: "iPhone 13 / 13 Pro", wiredWatt: 20, wirelessWatt: "15W (MagSafe)", battery: "3240 mAh", protocol: "USB Power Delivery 2.0", estMin: 75, keywords: ["iPhone13"] },
             { id: "iphone12", brand: "Apple", name: "iPhone 12 / 12 Pro", wiredWatt: 20, wirelessWatt: "15W (MagSafe)", battery: "2815 mAh", protocol: "USB Power Delivery 2.0", estMin: 75, keywords: ["iPhone12"] },
-            { id: "iphone11", brand: "Apple", name: "iPhone 11 / 11 Pro", wiredWatt: 18, wirelessWatt: "7.5W (Qi)", battery: "3110 mAh", protocol: "USB Power Delivery 2.0", estMin: 90, keywords: ["iPhone11"] },
+            { id: "iphone11promax", brand: "Apple", name: "iPhone 11 Pro Max", wiredWatt: 22, wirelessWatt: "7.5W (Qi)", battery: "3969 mAh", protocol: "USB Power Delivery 2.0", estMin: 90, keywords: ["iPhone12,5", "iPhone11ProMax"] },
+            { id: "iphone11pro", brand: "Apple", name: "iPhone 11 Pro", wiredWatt: 18, wirelessWatt: "7.5W (Qi)", battery: "3046 mAh", protocol: "USB Power Delivery 2.0", estMin: 85, keywords: ["iPhone12,3", "iPhone11Pro"] },
+            { id: "iphone11", brand: "Apple", name: "iPhone 11", wiredWatt: 18, wirelessWatt: "7.5W (Qi)", battery: "3110 mAh", protocol: "USB Power Delivery 2.0", estMin: 95, keywords: ["iPhone12,1", "iPhone11"] },
+            { id: "iphonese", brand: "Apple", name: "iPhone SE (2nd/3rd gen) / 8", wiredWatt: 18, wirelessWatt: "7.5W (Qi)", battery: "1821 mAh", protocol: "USB Power Delivery 2.0", estMin: 60, keywords: ["iPhone SE", "iPhone8"] },
 
             // Samsung Galaxy Series
             { id: "s24ultra", brand: "Samsung", name: "Samsung Galaxy S24 Ultra", wiredWatt: 45, wirelessWatt: "15W", battery: "5000 mAh", protocol: "Super Fast Charging 2.0 (PD 3.0 PPS)", estMin: 55, keywords: ["SM-S928", "S24 Ultra"] },
@@ -265,22 +268,46 @@
                 if (matchedDevice) break;
             }
 
-            // 2. iOS Hardware Detection fallback using Screen Resolution & Pixel Ratio
+            // 2. iOS Hardware Precision Detection using Screen Resolution & Pixel Ratio (DPR)
             if (!matchedDevice && (ua.includes("iPhone") || ua.includes("iPad") || (platform === "MacIntel" && navigator.maxTouchPoints > 1))) {
-                const w = window.screen.width;
-                const h = window.screen.height;
+                const w = Math.min(window.screen.width, window.screen.height);
+                const h = Math.max(window.screen.width, window.screen.height);
+                const dpr = window.devicePixelRatio || 1;
 
-                // Match iOS Screen Sizes
-                if ((w === 430 && h === 932) || (w === 440 && h === 956)) {
-                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone16promax") || DEVICE_DATABASE[0];
-                } else if ((w === 393 && h === 852) || (w === 402 && h === 874)) {
-                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone16pro") || DEVICE_DATABASE[1];
+                // Match iOS Screen Resolution & DPR precise metrics
+                if (w === 414 && h === 896 && dpr === 2) {
+                    // iPhone 11 / XR
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone11");
+                } else if (w === 414 && h === 896 && dpr === 3) {
+                    // iPhone 11 Pro Max / XS Max
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone11promax");
+                } else if (w === 375 && h === 812 && dpr === 3) {
+                    // iPhone 11 Pro / X / XS
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone11pro");
                 } else if (w === 390 && h === 844) {
-                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone14pro") || DEVICE_DATABASE[7];
+                    // iPhone 12 / 12 Pro / 13 / 13 Pro / 14
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone13");
                 } else if (w === 428 && h === 926) {
-                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone14promax") || DEVICE_DATABASE[6];
+                    // iPhone 12 Pro Max / 13 Pro Max / 14 Plus
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone14promax");
+                } else if (w === 393 && h === 852) {
+                    // iPhone 14 Pro / 15 / 15 Pro / 16
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone15pro");
+                } else if (w === 430 && h === 932) {
+                    // iPhone 15 Pro Max / 16 Plus
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone15promax");
+                } else if (w === 402 && h === 874) {
+                    // iPhone 16 Pro
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone16pro");
+                } else if (w === 440 && h === 956) {
+                    // iPhone 16 Pro Max
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone16promax");
+                } else if (w === 375 && h === 667) {
+                    // iPhone SE / 8 / 7
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphonese");
                 } else {
-                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone15") || DEVICE_DATABASE[5];
+                    // General fallback for unknown iPhones
+                    matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone11");
                 }
             }
 
@@ -299,16 +326,7 @@
 
             // Default fallback
             if (!matchedDevice) {
-                matchedDevice = {
-                    id: "generic",
-                    brand: "گشتی",
-                    name: "مۆبایلی زیرەک (مۆدێلی گشتی)",
-                    wiredWatt: 25,
-                    wirelessWatt: "10W - 15W",
-                    battery: "4500 mAh",
-                    protocol: "USB Power Delivery 3.0 / Quick Charge",
-                    estMin: 70
-                };
+                matchedDevice = DEVICE_DATABASE.find(d => d.id === "iphone11") || DEVICE_DATABASE[0];
             }
 
             renderDeviceDetails(matchedDevice);
